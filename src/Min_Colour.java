@@ -55,6 +55,11 @@ public class Min_Colour {
 
 
         System.out.println(evaluate_colour_cross(nodes, colours));
+        basic_strat(nodes, colours);
+        // Check after one iteration
+        System.out.println(evaluate_colour_cross(nodes, colours));
+        basic_strat(nodes, colours);
+        System.out.println(evaluate_colour_cross(nodes, colours));
     }
 
     /**
@@ -174,7 +179,7 @@ public class Min_Colour {
 
         // using the opposite sector to find the node to swap
 
-        if (c.majority_sec() == 1) {
+        if (c.majority_sec() == 2) {
             for (int i = nodes.length / 2; i < nodes.length; i++) {
                 // Copying the nodes over to no change the values in the current address of the nodes.
                 for (int j = 0; j < nodes.length; j++) {
@@ -187,7 +192,7 @@ public class Min_Colour {
                     min_count = current_count;
                 }
             }
-        } else if (c.majority_sec() == 2) {
+        } else if (c.majority_sec() == 1) {
             for (int i = 0; i < nodes.length / 2; i++) {
                 // Copying the nodes over to no change the values in the current address of the nodes.
                 for (int j = 0; j < nodes.length; j++) {
@@ -218,5 +223,15 @@ public class Min_Colour {
         Node temp = nodes[x];
         nodes[x] = nodes[y];
         nodes[y] = temp;
+    }
+
+
+    public static void draw_model(Node[] nodes, Colour[] colours) {
+        StdDraw.setCanvasSize(800, 800);
+        StdDraw.setXscale(0, 800);
+        StdDraw.setYscale(800, 0);
+
+        // Setting up the GUI
+
     }
 }
