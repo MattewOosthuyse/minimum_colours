@@ -16,20 +16,20 @@ public class Min_Colour {
 
         // Initialising the nodes
         Node[] nodes = new Node[8];
-        for (int i = 0; i < nodes.length; i++) {
+        for (int i = 0; i < nodes.length; i++)
             nodes[i] = new Node(i);
-        }
+
 
         // Initialising the colours
         Colour[] colours = new Colour[5];
-        for (int i = 0; i < colours.length; i++) {
+        for (int i = 0; i < colours.length; i++)
             colours[i] = new Colour(i);
-        }
 
         // TODO: Read in excel files
         FileInputStream fis = null;
         try {
-            fis = new FileInputStream(new File("../data/data_file.xlsx"));
+            fis = new FileInputStream(new File("data/data.xls"));
+            System.out.println("Got to the other side of the file reading in");
 
             HSSFWorkbook wb = null;
             try {
@@ -42,7 +42,7 @@ public class Min_Colour {
                     for (Cell cell : row) {
                         if (cell.getNumericCellValue() == 1) {
                             // Add the node to the colours adj list
-                            colours[row.getRowNum()].add_node(cell.getColumnIndex());
+                            colours[row.getRowNum()].add_node(cell.getColumnIndex() + 1);
                         }
                     }
                 }
@@ -60,7 +60,8 @@ public class Min_Colour {
         for (int i = 0; i < colours.length; i++)
             System.out.println(colours[i].get_adj_list());
 
-        // TODO: The nodes need an adjacency list
+        // TODO Have an evaluation function that determines how many colours cross the midpoint
+        //
         // TODO: Each node has a colour assigned to it
     }
 }
