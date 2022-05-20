@@ -1,20 +1,26 @@
+import java.awt.*;
 import java.util.ArrayList;
 
 public class Colour {
-    private int colour_val, sec_diff, sec;
+    private int sec_diff, sec;
+    private Color col;
     private boolean sector;
     private ArrayList<Integer> adj = new ArrayList<Integer>();
 
-    public Colour(int colour_val) {
-        this.colour_val = colour_val;
+    public Colour() {
+
     }
 
     public void add_node(int node_val) {
         adj.add(node_val);
     }
 
-    public int get_colour() {
-        return colour_val;
+    public Color get_colour() {
+        return col;
+    }
+
+    public void set_colour(Color col) {
+        this.col = col;
     }
 
     public void set_sec(boolean sector) {
@@ -42,7 +48,7 @@ public class Colour {
     }
 
     public int diff_percent() {
-        return (int) ((double) sec_diff/ (double) adj.size() * 100);
+        return (int) ((double) sec_diff / (double) adj.size() * 100);
     }
 
 
