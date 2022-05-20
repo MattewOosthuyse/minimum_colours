@@ -1,14 +1,14 @@
 import java.util.ArrayList;
 
-public class colour {
+public class Colour {
     private int colour_val;
-    private ArrayList<int> adj = new ArrayList<int>();
+    private ArrayList<Integer> adj = new ArrayList<Integer>();
 
-    public colour(int colour_val) {
+    public Colour(int colour_val) {
         this.colour_val = colour_val;
     }
 
-    public void add_colour(int node_val) {
+    public void add_node(int node_val) {
         adj.add(node_val);
     }
 
@@ -16,11 +16,7 @@ public class colour {
         return colour_val;
     }
 
-    public int[] get_adj_list() {
-        int size = adj.size();
-        int[] temp = new int[size];
-        for (int i = 0; i < size; i++) {
-            temp[i] = adj.get(i);
-        }
+    public ArrayList<Integer> get_adj_list() {
+        return adj;
     }
 }
