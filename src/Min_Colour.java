@@ -140,14 +140,10 @@ public class Min_Colour {
                 // After the sectors have been determined
                 // get the difference in sectors for later evaluation
                 int diff = Math.abs(sec_1 - sec_2);
-                if (sec_1 == 0)
-                    colour.set_sec(true);
-                else if (sec_2 == 0)
-                    colour.set_sec(true);
-                else if (sec_1 > sec_2)
-                    colour.set_majority_sec(1);
-                else if (sec_2 > sec_1)
-                    colour.set_majority_sec(2);
+                if (sec_1 == 0) colour.set_sec(true);
+                else if (sec_2 == 0) colour.set_sec(true);
+                else if (sec_1 > sec_2) colour.set_majority_sec(1);
+                else if (sec_2 > sec_1) colour.set_majority_sec(2);
                 colour.set_sec_diff(diff);
             }
         }
@@ -287,19 +283,43 @@ public class Min_Colour {
             for (int j = 0; j < n.size(); j++) {
                 // Find the nodes in the graph
                 for (int x = 0; x < nodes.length; x++)
-                    if (nodes[x].get_Node() == n.get(j))
-                        for (int k = 0; k < n.size(); k++)
-                            for (int y = 0; y < nodes.length; y++)
-                                if (nodes[y].get_Node() == n.get(k))
-                                    // have the nodes that are in the bottom half first
-                                    if (x < nodes.length / 2 && y < nodes.length / 2)
-                                        StdDraw.line(800 / half + 150 * x, 200, 800 / half + 150 * y, 200);
-                                    else if (x < half)
-                                        StdDraw.line(800 / half + 150 * x, 200, 800 / half + 150 * (y / 2), 400);
-                                    else if (y < half)
-                                        StdDraw.line(800 / half + 150 * (x / 2), 400, 800 / half + 150 * y, 200);
-                                    else
-                                        StdDraw.line(800 / half + 150 * (x / 2), 400, 800 / half + 150 * (y / 2), 400);
+                    if (nodes[x].get_Node() == n.get(j)) for (int k = 0; k < n.size(); k++)
+                        for (int y = 0; y < nodes.length; y++)
+                            if (nodes[y].get_Node() == n.get(k)) {
+                                int adapt_x;
+                                int adapt_y;
+                                // Find whether x and y are at the top or bottom half
+                                // Finding x
+                                if (x < nodes.length / 2) {
+                                    if (x == 0 || x == nodes.length / 2 - 1)
+                                        adapt_x = 225;
+                                    else adapt_x = 150;
+                                } else {
+                                    if (x == nodes.length / 2 || x == nodes.length - 1)
+                                        adapt_x = 375;
+                                    else adapt_x = 450;
+                                }
+                                // Finding y
+                                if (y < nodes.length / 2) {
+                                    if (y == 0 || y == nodes.length / 2 - 1)
+                                        adapt_y = 225;
+                                    else adapt_y = 150;
+                                } else {
+                                    if (y == nodes.length / 2 || y == nodes.length - 1)
+                                        adapt_y = 450;
+                                    else adapt_y = 375;
+                                }
+
+                                // have the nodes that are in the bottom half first
+                                if (x < nodes.length / 2 && y < nodes.length / 2)
+                                    StdDraw.line(800 / half + 150 * x, adapt_x, 800 / half + 150 * y, adapt_y);
+                                else if (x < half)
+                                    StdDraw.line(800 / half + 150 * x, adapt_x, 800 / half + 150 * (y / 2), adapt_y);
+                                else if (y < half)
+                                    StdDraw.line(800 / half + 150 * (x / 2), adapt_x, 800 / half + 150 * y, adapt_y);
+                                else
+                                    StdDraw.line(800 / half + 150 * (x / 2), adapt_x, 800 / half + 150 * (y / 2), adapt_y);
+                            }
             }
         }
     }
