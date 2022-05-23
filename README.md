@@ -2,7 +2,8 @@
 Each colour performs a complete subgraph. Grouping nodes so that there is a minimum number of colours that cross the midpoint line.
 
 # Solution
-```Time taken: 0.4213 milli seconds
+```
+Time taken: 0.4213 milli seconds
 Group 1: 4, 5, 2, 3
 Group 2: 0, 1, 6, 7
 Minimum colours cross: 1
