@@ -13,28 +13,50 @@ import java.util.ArrayList;
 
 public class Min_Colour {
 
-    public static void main(String[] args) {
+    private int min_count = 10000;
+    private int current_index = 0;
+    private int global_depth = 0;
+    private Node[] best;
 
+    public static void main(String[] args) {
+        new Min_Colour(8, 5, 0);
+        new Min_Colour(10, 30, 1);
+        new Min_Colour(40, 90, 2);
+        new Min_Colour(50, 150, 3);
+        new Min_Colour(60, 250, 4);
+        new Min_Colour(60, 500, 5);
+        System.out.println("A real life size problem as suggested in the document: 1500_60");
+        new Min_Colour(60, 1500, 6);
+    }
+
+    /**
+     * Min colour that finds the minimum number of
+     *
+     * @param node_count   the number of nodes that the current iteration will use
+     * @param colour_count the number of colours the current iteration will use
+     * @param sheet_num    the sheet number that the data will be retrieved from
+     */
+    public Min_Colour(int node_count, int colour_count, int sheet_num) {
         // Initialising the nodes
-        Node[] nodes = new Node[8];
+        Node[] nodes = new Node[node_count];
         for (int i = 0; i < nodes.length; i++)
             nodes[i] = new Node(i);
 
 
         // Initialising the colours
-        Colour[] colours = new Colour[5];
+        Colour[] colours = new Colour[colour_count];
         for (int i = 0; i < colours.length; i++)
             colours[i] = new Colour();
 
         // Setting up the colours for the simple examples
-        colours[0].set_colour(StdDraw.CYAN);
-        colours[1].set_colour(StdDraw.GREEN);
-        colours[2].set_colour(StdDraw.YELLOW);
-        colours[3].set_colour(StdDraw.RED);
-        colours[4].set_colour(StdDraw.BLUE);
+//        colours[0].set_colour(StdDraw.BLUE);
+//        colours[1].set_colour(StdDraw.RED);
+//        colours[2].set_colour(StdDraw.GREEN);
+//        colours[3].set_colour(StdDraw.ORANGE);
+//        colours[4].set_colour(StdDraw.CYAN);
 
 
-        // TODO: Read in excel files
+        //  Read in excel files
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(new File("data/data.xls"));
@@ -42,7 +64,7 @@ public class Min_Colour {
             HSSFWorkbook wb = null;
             try {
                 wb = new HSSFWorkbook(fis);
-                HSSFSheet sheet = wb.getSheetAt(0);
+                HSSFSheet sheet = wb.getSheetAt(sheet_num);
 
                 FormulaEvaluator formula_eval = wb.getCreationHelper().createFormulaEvaluator();
 
@@ -61,25 +83,25 @@ public class Min_Colour {
             System.out.println("the file was not found or there was an error when reading the file");
         }
 
+        Stopwatch s = new Stopwatch();
+        simple_swap(nodes, colours);
 
-        System.out.println(evaluate_colour_cross(nodes, colours));
-        draw_model(nodes, colours);
-        while (!StdDraw.hasNextKeyTyped()) ;
 
-        basic_strat(nodes, colours);
-        draw_model(nodes, colours);
-        while (!StdDraw.hasNextKeyTyped()) ;
-        // Check after one iteration
-        System.out.println(evaluate_colour_cross(nodes, colours));
-
-        basic_strat(nodes, colours);
-        draw_model(nodes, colours);
-        while (!StdDraw.hasNextKeyTyped()) ;
-        System.out.println(evaluate_colour_cross(nodes, colours));
-
-        for (int i = 0; i < colours.length; i++) {
-            System.out.println((colours[i].get_adj_list()) + " the colours for these nodes are:" + colours[i].get_colour().toString());
+        StringBuilder sb = new StringBuilder();
+        sb.append("Time taken: ").append(s.elapsedTime()).append("\n");
+        sb.append("Group 1: ");
+        for (int i = 0; i < best.length; i++) {
+            sb.append(best[i].get_Node());
+            if (i == best.length / 2 - 1) {
+                sb.append("\nGroup 2: ");
+            } else if (i < best.length - 1) {
+                sb.append(", ");
+            }
         }
+        sb.append("\nMinimum colours cross: ").append(min_count).append("\n");
+        System.out.println(sb.toString());
+
+        //draw_model(best, colours);
 
     }
 
@@ -90,11 +112,11 @@ public class Min_Colour {
      * @param colours the colours with their node lists
      * @return the number of colours that cross the midline
      */
-    public static int evaluate_colour_cross(Node[] nodes, Colour[] colours) {
+    public int evaluate_colour_cross(Node[] nodes, Colour[] colours) {
         int count = 0;
         // Inside each colour, find which half of the array the nodes are situated
-        for (int i = 0; i < colours.length; i++) {
-            ArrayList<Integer> n = colours[i].get_adj_list();
+        for (Colour colour : colours) {
+            ArrayList<Integer> n = colour.get_adj_list();
             // Boolean flags to see where the nodes are in the list
             boolean first = false, second = false, found = false;
             for (int j = 0; j < n.size(); j++) {
@@ -108,7 +130,7 @@ public class Min_Colour {
                     // If there are nodes in both halves, break out of the loop.
                     if (first && second) {
                         count++;
-                        colours[i].set_sec(false);
+                        colour.set_sec(false);
                         found = true;
                         break;
                     }
@@ -125,18 +147,15 @@ public class Min_Colour {
      * @param nodes   array of the nodes
      * @param colours array of the colours
      */
-    public static void basic_strat(Node[] nodes, Colour[] colours) {
+    public void basic_strat(Node[] nodes, Colour[] colours) {
         for (Colour colour : colours) {
             if (!colour.one_sector()) {
                 ArrayList<Integer> n = colour.get_adj_list();
                 int sec_1 = 0, sec_2 = 0;
                 for (int j = 0; j < n.size(); j++) {
                     for (int x = 0; x < nodes.length; x++)
-                        if (nodes[x].get_Node() == n.get(j))
-                            if (x < nodes.length / 2)
-                                sec_1++;
-                            else
-                                sec_2++;
+                        if (nodes[x].get_Node() == n.get(j)) if (x < nodes.length / 2) sec_1++;
+                        else sec_2++;
                 }
                 // After the sectors have been determined
                 // get the difference in sectors for later evaluation
@@ -152,11 +171,11 @@ public class Min_Colour {
         // Get the colour that has the biggest % difference
         Colour c = null;
         int current_diff_percent = 0;
-        for (int i = 0; i < colours.length; i++) {
+        for (Colour colour : colours) {
             // Get the colours diff %
-            int percent = colours[i].diff_percent();
+            int percent = colour.diff_percent();
             if (current_diff_percent < percent) {
-                c = colours[i];
+                c = colour;
                 current_diff_percent = percent;
             }
         }
@@ -227,13 +246,60 @@ public class Min_Colour {
     }
 
     /**
+     * Perform a simple swap function that swaps the nodes until a minimum is found
+     * Recursive that searches the tree to find the best solution.
+     *
+     * @param nodes   The current state of the nodes
+     * @param colours The object that stores the colours
+     */
+    public void simple_swap(Node[] nodes, Colour[] colours) {
+        //  similar to minimax, perform an iteration and get the minimum
+        // like minimax but wanting to constantly min.
+        // go through all moves perform a swap, get the best outcome.
+        // Need a copy nodes function to be able to store the best moves.
+        Node[] current_best = new Node[nodes.length];
+        int current_min = 10000;
+        for (int i = 0; i < nodes.length / 2; i++) {
+            Node[] temp = copy_nodes(nodes);
+            swap(temp, current_index++, i + nodes.length / 2);
+            int current_count = evaluate_colour_cross(temp, colours);
+            if (current_min > current_count) {
+                current_min = current_count;
+                current_best = temp;
+            }
+        }
+
+        // Set the global best to the current best if it is better that the old best
+        if (min_count > current_min) {
+            min_count = current_min;
+            best = current_best;
+        }
+
+        // Check to see if the current index is at the end of the array
+        if (current_index < nodes.length / 2) {
+            simple_swap(current_best, colours);
+        } else if (global_depth < 100) {
+            // set current index to the beginning and try again
+            current_index = 0;
+            global_depth++;
+            simple_swap(current_best, colours);
+        }
+    }
+
+    public Node[] copy_nodes(Node[] nodes) {
+        Node[] temp = new Node[nodes.length];
+        System.arraycopy(nodes, 0, temp, 0, nodes.length);
+        return temp;
+    }
+
+    /**
      * Function that swaps two nodes in the list
      *
      * @param nodes array of the nodes
      * @param x     node pos to be swapped
      * @param y     node pos to be swapped
      */
-    public static void swap(Node[] nodes, int x, int y) {
+    public void swap(Node[] nodes, int x, int y) {
         Node temp = nodes[x];
         nodes[x] = nodes[y];
         nodes[y] = temp;
@@ -245,7 +311,7 @@ public class Min_Colour {
      * @param nodes   the list of the nodes
      * @param colours the colours that are connected to the different nodes
      */
-    public static void draw_model(Node[] nodes, Colour[] colours) {
+    public void draw_model(Node[] nodes, Colour[] colours) {
         StdDraw.setCanvasSize(800, 600);
 
         StdDraw.setXscale(0, 800);
@@ -278,7 +344,7 @@ public class Min_Colour {
      * @param nodes   array of the nodes
      * @param colours array of the colours
      */
-    public static void draw_colours(Node[] nodes, Colour[] colours) {
+    public void draw_colours(Node[] nodes, Colour[] colours) {
         // Setting the positions that all the nodes will be in.
         int half = nodes.length / 2;
         // Loop through the colours, start at the first node, draw a line to all the other colours and then do the same at the next node
@@ -297,22 +363,18 @@ public class Min_Colour {
                                 // Find whether x and y are at the top or bottom half
                                 // Finding x
                                 if (x < nodes.length / 2) {
-                                    if (x == 0 || x == nodes.length / 2 - 1)
-                                        adapt_x = 225;
+                                    if (x == 0 || x == nodes.length / 2 - 1) adapt_x = 225;
                                     else adapt_x = 150;
                                 } else {
-                                    if (x - half == 0 || x - half == nodes.length / 2 - 1)
-                                        adapt_x = 375;
+                                    if (x - half == 0 || x - half == nodes.length / 2 - 1) adapt_x = 375;
                                     else adapt_x = 450;
                                 }
                                 // Finding y
                                 if (y < nodes.length / 2) {
-                                    if (y == 0 || y == nodes.length / 2 - 1)
-                                        adapt_y = 225;
+                                    if (y == 0 || y == nodes.length / 2 - 1) adapt_y = 225;
                                     else adapt_y = 150;
                                 } else {
-                                    if (y - half == 0 || y - half == nodes.length / 2 - 1)
-                                        adapt_y = 375;
+                                    if (y - half == 0 || y - half == nodes.length / 2 - 1) adapt_y = 375;
                                     else adapt_y = 450;
                                 }
 
@@ -336,7 +398,7 @@ public class Min_Colour {
      * @param nodes   list of the nodes to be drawn
      * @param colours list of the colour objects with their properties
      */
-    public static void draw_nodes(Node[] nodes, Colour[] colours) {
+    public void draw_nodes(Node[] nodes, Colour[] colours) {
         // Set the positions of all the nodes
         int half = nodes.length / 2;
         int adapt_y = 225;
