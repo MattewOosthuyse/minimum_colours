@@ -77,6 +77,10 @@ public class Min_Colour {
         while (!StdDraw.hasNextKeyTyped()) ;
         System.out.println(evaluate_colour_cross(nodes, colours));
 
+        for (int i = 0; i < colours.length; i++) {
+            System.out.println((colours[i].get_adj_list()) + " the colours for these nodes are:" + colours[i].get_colour().toString());
+        }
+
     }
 
     /**
@@ -127,15 +131,12 @@ public class Min_Colour {
                 ArrayList<Integer> n = colour.get_adj_list();
                 int sec_1 = 0, sec_2 = 0;
                 for (int j = 0; j < n.size(); j++) {
-                    for (int x = 0; x < nodes.length; x++) {
-                        if (nodes[x].get_Node() == n.get(j)) {
-                            if (x < nodes.length / 2) {
+                    for (int x = 0; x < nodes.length; x++)
+                        if (nodes[x].get_Node() == n.get(j))
+                            if (x < nodes.length / 2)
                                 sec_1++;
-                            } else {
+                            else
                                 sec_2++;
-                            }
-                        }
-                    }
                 }
                 // After the sectors have been determined
                 // get the difference in sectors for later evaluation
@@ -268,10 +269,15 @@ public class Min_Colour {
 
         StdDraw.show();
 
-        // Setting up the colours for the
 
     }
 
+    /**
+     * This draws the colours on the canvas
+     *
+     * @param nodes   array of the nodes
+     * @param colours array of the colours
+     */
     public static void draw_colours(Node[] nodes, Colour[] colours) {
         // Setting the positions that all the nodes will be in.
         int half = nodes.length / 2;
@@ -295,7 +301,7 @@ public class Min_Colour {
                                         adapt_x = 225;
                                     else adapt_x = 150;
                                 } else {
-                                    if (x == nodes.length / 2 || x == nodes.length - 1)
+                                    if (x - half == 0 || x - half == nodes.length / 2 - 1)
                                         adapt_x = 375;
                                     else adapt_x = 450;
                                 }
@@ -305,20 +311,20 @@ public class Min_Colour {
                                         adapt_y = 225;
                                     else adapt_y = 150;
                                 } else {
-                                    if (y == nodes.length / 2 || y == nodes.length - 1)
-                                        adapt_y = 450;
-                                    else adapt_y = 375;
+                                    if (y - half == 0 || y - half == nodes.length / 2 - 1)
+                                        adapt_y = 375;
+                                    else adapt_y = 450;
                                 }
 
                                 // have the nodes that are in the bottom half first
                                 if (x < nodes.length / 2 && y < nodes.length / 2)
                                     StdDraw.line(800 / half + 150 * x, adapt_x, 800 / half + 150 * y, adapt_y);
                                 else if (x < half)
-                                    StdDraw.line(800 / half + 150 * x, adapt_x, 800 / half + 150 * (y / 2), adapt_y);
+                                    StdDraw.line(800 / half + 150 * x, adapt_x, 800 / half + 150 * (y - half), adapt_y);
                                 else if (y < half)
-                                    StdDraw.line(800 / half + 150 * (x / 2), adapt_x, 800 / half + 150 * y, adapt_y);
+                                    StdDraw.line(800 / half + 150 * (x - half), adapt_x, 800 / half + 150 * y, adapt_y);
                                 else
-                                    StdDraw.line(800 / half + 150 * (x / 2), adapt_x, 800 / half + 150 * (y / 2), adapt_y);
+                                    StdDraw.line(800 / half + 150 * (x - half), adapt_x, 800 / half + 150 * (y - half), adapt_y);
                             }
             }
         }
