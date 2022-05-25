@@ -19,14 +19,14 @@ public class Min_Colour {
     private Node[] best;
 
     public static void main(String[] args) {
-        new Min_Colour(8, 5, 0);
+        //new Min_Colour(8, 5, 0);
         new Min_Colour(10, 30, 1);
-        new Min_Colour(40, 90, 2);
-        new Min_Colour(50, 150, 3);
-        new Min_Colour(60, 250, 4);
-        new Min_Colour(60, 500, 5);
-        System.out.println("A real life size problem as suggested in the document: 1500_60");
-        new Min_Colour(60, 1500, 6);
+        //new Min_Colour(40, 90, 2);
+        //new Min_Colour(50, 150, 3);
+        //new Min_Colour(60, 250, 4);
+        //new Min_Colour(60, 500, 5);
+        // System.out.println("A real life size problem as suggested in the document: 1500_60");
+        // new Min_Colour(60, 1500, 6);
     }
 
     /**
@@ -37,16 +37,13 @@ public class Min_Colour {
      * @param sheet_num    the sheet number that the data will be retrieved from
      */
     public Min_Colour(int node_count, int colour_count, int sheet_num) {
-        // Initialising the nodes
-        Node[] nodes = new Node[node_count];
-        for (int i = 0; i < nodes.length; i++)
-            nodes[i] = new Node(i);
 
 
         // Initialising the colours
         Colour[] colours = new Colour[colour_count];
         for (int i = 0; i < colours.length; i++)
             colours[i] = new Colour();
+
 
         // Setting up the colours for the simple examples
 //        colours[0].set_colour(StdDraw.BLUE);
@@ -83,15 +80,51 @@ public class Min_Colour {
             System.out.println("the file was not found or there was an error when reading the file");
         }
 
-        Stopwatch s = new Stopwatch();
-        simple_swap(nodes, colours);
+
+        // Doing some preprocessing
+        // One way to do it - find the nodes that have the least colours, place them in one sector
+        // Option 1:
+        // get the biggest colour and divide it between the nodes.
+        // get the smallest nodes and try
+
+        // Pre-processing
+
+        // Initialising the nodes
+        Node[] nodes = new Node[node_count];
+        for (int i = 0; i < nodes.length; i++)
+            nodes[i] = new Node(i);
+
+        // Go through the colours and set the colour count to the node objects
+        for (int i = 1; i < colours.length; i++) {
+            ArrayList<Integer> n = colours[i].get_adj_list();
+            for (int j = 0; j < n.size(); j++) {
+                nodes[n.get(j)].inc_colour_count();
+            }
+        }
+
+        // Sort the nodes by the number of colours that go to them.
+        // Thereafter - find the nodes that are part of the large colours and sort.
+        for (int i = 0; i < nodes.length - 1; i++) {
+            for (int j = i + 1; j < nodes.length; j++) {
+                if (nodes[i].get_nodes_colour_count() < nodes[j].get_nodes_colour_count()) {
+                    Node temp = nodes[i];
+                    nodes[i] = nodes[j];
+                    nodes[j] = temp;
+                }
+            }
+        }
+
+        best = nodes;
+        min_count = evaluate_colour_cross(best, colours);
+
+        swap(nodes, colours);
 
 
         StringBuilder sb = new StringBuilder();
-        sb.append("Time taken: ").append(s.elapsedTime()).append("\n");
+        // sb.append("Time taken: ").append(s.elapsedTime()).append(" milli seconds\n");
         sb.append("Group 1: ");
         for (int i = 0; i < best.length; i++) {
-            sb.append(best[i].get_Node());
+            sb.append(best[i].get_Node() + 1);
             if (i == best.length / 2 - 1) {
                 sb.append("\nGroup 2: ");
             } else if (i < best.length - 1) {
@@ -99,7 +132,7 @@ public class Min_Colour {
             }
         }
         sb.append("\nMinimum colours cross: ").append(min_count).append("\n");
-        System.out.println(sb.toString());
+        System.out.println(sb);
 
         //draw_model(best, colours);
 
@@ -246,6 +279,39 @@ public class Min_Colour {
     }
 
     /**
+     * Non-recursive swapping function
+     */
+    public void swap(Node[] nodes, Colour[] colours) {
+        // This will keep track of the amount of times I do the test
+        // Do not currently need this though
+        Node[] temp = copy_nodes(nodes);
+        int max_depth = 100000000;
+        for (int z = 0; z < max_depth; z++) {
+            int i = (int) (Math.random() * nodes.length / 2);
+            int j = (int) (Math.random() * nodes.length / 2) + nodes.length / 2;
+            // Add in the tracker here ?
+            swap(temp, i, j);
+            int current_count = evaluate_colour_cross(temp, colours);
+            if (current_count < min_count) {
+                min_count = current_count;
+                best = temp;
+            }
+        }
+    }
+
+    public void advanced_solver(Node[] nodes, Colour[] colours, int i, int j) {
+
+        Node[] temp = copy_nodes(nodes);
+        swap(temp, i, j);
+        int current_count = evaluate_colour_cross(nodes, colours);
+        if (current_count < min_count) {
+            min_count = current_count;
+            best = temp;
+        }
+
+    }
+
+    /**
      * Perform a simple swap function that swaps the nodes until a minimum is found
      * Recursive that searches the tree to find the best solution.
      *
@@ -258,10 +324,46 @@ public class Min_Colour {
         // go through all moves perform a swap, get the best outcome.
         // Need a copy nodes function to be able to store the best moves.
         Node[] current_best = new Node[nodes.length];
+        for (int i = nodes.length / 2; i < nodes.length; i++) {
+            Node[] temp;
+            temp = copy_nodes(nodes);
+            swap(temp, current_index, i);
+
+            try {
+                int current_count = evaluate_colour_cross(temp, colours);
+                // Set the global best to the current best if it is better that the old best
+                if (min_count > current_count) {
+                    min_count = current_count;
+                    best = temp;
+                }
+                // Check to see if the current index is at the end of the array
+                if (current_index < nodes.length / 2) {
+                    simple_swap(current_best, colours);
+                } else if (global_depth < 100) {
+                    global_depth++;
+                    simple_swap(current_best, colours);
+                }
+            } catch (Exception e) {
+                if (++current_index == nodes.length / 2) {
+                    return;
+                }
+                global_depth = 0;
+            }
+        }
+
+
+    }
+
+    public void simple_swap_reverse(Node[] nodes, Colour[] colours) {
+        //  similar to minimax, perform an iteration and get the minimum
+        // like minimax but wanting to constantly min.
+        // go through all moves perform a swap, get the best outcome.
+        // Need a copy nodes function to be able to store the best moves.
+        Node[] current_best = new Node[nodes.length];
         int current_min = 10000;
         for (int i = 0; i < nodes.length / 2; i++) {
             Node[] temp = copy_nodes(nodes);
-            swap(temp, current_index++, i + nodes.length / 2);
+            swap(temp, --current_index, i + nodes.length / 2);
             int current_count = evaluate_colour_cross(temp, colours);
             if (current_min > current_count) {
                 current_min = current_count;
@@ -276,13 +378,68 @@ public class Min_Colour {
         }
 
         // Check to see if the current index is at the end of the array
-        if (current_index < nodes.length / 2) {
+        if (current_index < 0) {
             simple_swap(current_best, colours);
-        } else if (global_depth < 100) {
+        } else if (global_depth < 16) {
+            // set current index to the beginning and try again
+            current_index = nodes.length / 2;
+            global_depth++;
+            simple_swap(current_best, colours);
+        }
+    }
+
+    public void simple_swap_d_c(Node[] nodes, Colour[] colours) {
+        //  similar to minimax, perform an iteration and get the minimum
+        // like minimax but wanting to constantly min.
+        // go through all moves perform a swap, get the best outcome.
+        // Need a copy nodes function to be able to store the best moves.
+        Node[] current_best = new Node[nodes.length];
+        int current_min = 10000;
+        for (int i = nodes.length - 1; i >= 0; i--) {
+            Node[] temp = copy_nodes(nodes);
+            swap(temp, current_index++, i);
+            int current_count = evaluate_colour_cross(temp, colours);
+            if (current_min > current_count) {
+                current_min = current_count;
+                current_best = temp;
+            }
+        }
+
+        // Set the global best to the current best if it is better that the old best
+        if (min_count > current_min) {
+            min_count = current_min;
+            best = current_best;
+        }
+
+        // Check to see if the current index is at the end of the array
+        if (current_index < nodes.length) {
+            simple_swap(current_best, colours);
+        } else if (global_depth < 16) {
             // set current index to the beginning and try again
             current_index = 0;
             global_depth++;
             simple_swap(current_best, colours);
+        }
+    }
+
+
+    public void brute(Node[] nodes, Colour[] colours) {
+        int current_min = 1000;
+        Node[] current_best = new Node[nodes.length];
+        for (int i = 0; i < nodes.length / 2; i++) {
+            for (int j = nodes.length - 1; j > nodes.length / 2; j--) {
+                Node[] temp = copy_nodes(nodes);
+                swap(temp, i, j);
+                int current_count = evaluate_colour_cross(temp, colours);
+                if (current_count < current_min) {
+                    current_best = temp;
+                    current_min = current_count;
+                }
+            }
+        }
+        if (current_min < min_count) {
+            best = current_best;
+            min_count = current_min;
         }
     }
 
